@@ -15,7 +15,7 @@ pipeline {
 		stage("Build image") {
             steps {
                 script {
-                    myapp = docker.build("bedebhak/project_itdp:${env.BUILD_ID}")
+                    myapp = docker.build("yobananggoro/project-itdp:${env.BUILD_ID}")
                 }
             }
         }
@@ -25,12 +25,14 @@ pipeline {
                     docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
                             myapp.push("latest")
                             myapp.push("${env.BUILD_ID}")
-                    }
-                }
+						}
+					}
+				}
+			}
             
         stage('Deploy to GKE') {
             steps{
-                sh "sed -i 's/php_simple_curd:latest/php_simple_curd:${env.BUILD_ID}/g' deployment.yaml"
+                sh "sed -i 's/project-itdp:latest/project-itdp:${env.BUILD_ID}/g' deployment.yaml"
                 step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: true])
             }
         }
